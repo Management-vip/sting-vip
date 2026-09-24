@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sting VIP Membership</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #f0c040;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 30px 25px;
+            width: 300px;
+            flex: 0 0 auto;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(240, 192, 64, 0.15);
+            border-color: #f0c040;
+        }
+
+        .card.featured {
+            border: 2px solid #f0c040;
+            box-shadow: 0 0 30px rgba(240, 192, 64, 0.1);
+        }
+
+        .card.featured::before {
+            content: "BEST VALUE";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f0c040;
+            color: #0a0a0a;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            padding: 4px 16px;
+            border-radius: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .card .price {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #f0c040;
+            margin: 15px 0;
+        }
+
+        .card .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #888;
+        }
+
+        .card ul {
+            list-style: none;
+            text-align: left;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+
+        .card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #222;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .card ul li:last-child {
+            border-bottom: none;
+        }
+
+        .card ul li::before {
+            content: "✓ ";
+            color: #f0c040;
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 14px 40px;
+            background: #f0c040;
+            color: #0a0a0a;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #d4a82e;
+            transform: scale(1.02);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #f0c040;
+            color: #f0c040;
+        }
+
+        .btn-outline:hover {
+            background: #f0c040;
+            color: #0a0a0a;
+        }
+
+        /* Payment Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal h2 {
+            color: #f0c040;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        .modal .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #888;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal .close-btn:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #f0c040;
+        }
+
+        /* Gift Card Grid */
+        .gift-card-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .gift-card-option {
+            background: #0a0a0a;
+            border: 2px solid #222;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .gift-card-option.selected {
+            border-color: #f0c040;
+            background: #1a1a0a;
+        }
+
+        .gift-card-option img {
+            height: 30px;
+            margin-bottom: 6px;
+        }
+
+        .gift-card-option span {
+            display: block;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .gift-card-input {
+            margin-top: 15px;
+        }
+
+        .gift-card-input input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .gift-card-input input::placeholder {
+            letter-spacing: 0;
+        }
+
+        .modal .btn {
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .secure-badge svg {
+            fill: #666;
+            width: 16px;
+            height: 16px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: #f0c040;
+            text-decoration: none;
+        }
+
+        .selected-plan {
+            color: #f0c040;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card {
+                width: 100%;
+                max-width: 350px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .gift-card-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎸 STING VIP MEMBERSHIP</h1>
+        <p class="subtitle">Choose your access level. Connect one-on-one with Sting.</p>
+
+        <div class="cards">
+            <!-- Stage 1 -->
+            <div class="card" data-plan="stage1" data-price="100">
+                <h2>Stage 1</h2>
+                <div class="price">$100 <span>/ one-time</span></div>
+                <ul>
+                    <li>VIP Membership Card</li>
+                    <li>Access to private fan forum</li>
+                    <li>Text-based Q&A with Sting's team</li>
+                    <li>Digital welcome kit</li>
+                </ul>
+                <button class="btn btn-outline select-plan" data-plan="stage1">Select Stage 1</button>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="card featured" data-plan="stage2" data-price="200">
+                <h2>Stage 2</h2>
+                <div class="price">$200 <span>/ one-time</span></div>
+                <ul>
+                    <li>Everything in Stage 1</li>
+                    <li>Monthly group video call with Sting</li>
+                    <li>Priority access to new content</li>
+                    <li>Exclusive behind-the-scenes photos</li>
+                </ul>
+                <button class="btn select-plan" data-plan="stage2">Select Stage 2</button>
+            </div>
+
+            <!-- Stage 3 -->
+            <div class="card" data-plan="stage3" data-price="400">
+                <h2>Stage 3</h2>
+                <div class="price">$400 <span>/ one-time</span></div>
+                <ul>
+                    <li>Everything in Stage 2</li>
+                    <li>Private one-on-one video call with Sting</li>
+                    <li>Personalized video message from Sting</li>
+                    <li>Signed VIP certificate</li>
+                </ul>
+                <button class="btn btn-outline select-plan" data-plan="stage3">Select Stage 3</button>
+            </div>
+        </div>
+
+        <div class="selected-plan" id="selectedPlanDisplay"></div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <button class="close-btn" id="closeModal">&times;</button>
+            <h2>Complete Your VIP Purchase</h2>
+            <p id="modalPlanDisplay">You selected: Stage 1 — $100</p>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Gift Card Type</label>
+                    <div class="gift-card-options" id="giftCardOptions">
+                        <div class="gift-card-option" data-brand="steam">
+                            <span>Steam</span>
+                        </div>
+                        <div class="gift-card-option" data-brand="amazon">
+                            <span>Amazon</span>
+                        </div>
+                        <div class="gift-card-option" data-brand="googleplay">
+                            <span>Google Play</span>
+                        </div>
+                        <div class="gift-card-option" data-brand="visa">
+                            <span>Visa</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group gift-card-input">
+                    <label for="giftCardCode">Gift Card Code</label>
+                    <input type="text" id="giftCardCode" placeholder="Enter your 16-digit gift card code" maxlength="19" required>
+                </div>
+
+                <button type="submit" class="btn">Pay with Gift Card</button>
+            </form>
+
+            <div class="secure-badge">
+                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                Secured with 256-bit encryption
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Official Sting Management Team | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </div>
+
+    <!-- Chaport Live Chat -->
+    <script type="text/javascript">
+        (function(w,d,v3){
+            w.chaportConfig = {
+                appId : '6aaeb09165f76a269020bdbf',
+            };
+            if(w.chaport)return;v3=w.chaport={};v3._q=[];v3._l={};v3.q=function(){v3._q.push(arguments)};v3.on=function(e,fn){if(!v3._l[e])v3._l[e]=[];v3._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.com/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document);
+    </script>
+
+    <script>
+        let selectedPlan = null;
+        let selectedPrice = 0;
+        let selectedGiftCard = null;
+
+        // Plan selection buttons
+        document.querySelectorAll('.select-plan').forEach(button => {
+            button.addEventListener('click', function() {
+                const plan = this.dataset.plan;
+                const card = this.closest('.card');
+                const price = parseInt(card.dataset.price);
+                selectedPlan = plan;
+                selectedPrice = price;
+
+                const planNames = {
+                    stage1: 'Stage 1',
+                    stage2: 'Stage 2',
+                    stage3: 'Stage 3'
+                };
+
+                document.getElementById('selectedPlanDisplay').textContent = `You selected: ${planNames[plan]} — $${price}`;
+                document.getElementById('modalPlanDisplay').textContent = `You selected: ${planNames[plan]} — $${price}`;
+                document.getElementById('paymentModal').classList.add('active');
+            });
+        });
+
+        // Close modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('paymentModal').classList.remove('active');
+        });
+
+        // Close modal on overlay click
+        document.getElementById('paymentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Gift card selection
+        document.querySelectorAll('.gift-card-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.gift-card-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedGiftCard = this.dataset.brand;
+            });
+        });
+
+        // Format gift card code input (auto-add dashes)
+        document.getElementById('giftCardCode').addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9]/g, '').substring(0, 16);
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += '-';
+                formatted += value[i];
+            }
+            this.value = formatted;
+        });
+
+        // Form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const giftCardCode = document.getElementById('giftCardCode').value.trim();
+
+            if (!fullName || !email || !selectedGiftCard || !giftCardCode) {
+                alert('Please fill in all fields and select a gift card type.');
+                return;
+            }
+
+            if (giftCardCode.replace(/-/g, '').length !== 16) {
+                alert('Please enter a valid 16-digit gift card code.');
+                return;
+            }
+
+            // Simulate payment processing
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                // Simulate success
+                alert(`Congratulations, ${fullName}! Your ${selectedPlan.toUpperCase()} VIP Membership is being activated.\n\nWe will contact you at ${email} within 24 hours to schedule your exclusive experience with Sting.\n\nThank you for your support.`);
+                document.getElementById('paymentModal').classList.remove('active');
+                submitBtn.textContent = 'Pay with Gift Card';
+                submitBtn.disabled = false;
+                this.reset();
+                document.querySelectorAll('.gift-card-option').forEach(o => o.classList.remove('selected'));
+                selectedGiftCard = null;
+                document.getElementById('selectedPlanDisplay').textContent = '';
+            }, 2500);
+        });
+    </script>
+
+</body>
+</html>
